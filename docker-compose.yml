@@ -1,0 +1,69 @@
+version: "3"
+services:
+  web:
+    image: welovelink/php74nginx
+    container_name: ${APP_NAME}_web
+    user: www-data
+    #user: root
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www/html
+      - ./php.ini:/usr/local/etc/php/php.ini
+      - ./web-server.conf:/etc/nginx/conf.d/server.conf
+  redis:
+      image: redis:3.2.11
+      container_name: ${APP_NAME}_redis
+      restart: always
+      privileged: true
+      volumes:
+          - ./local-redis.conf:/usr/local/etc/redis/redis.conf
+          - ./init.sh:/usr/local/etc/redis/init.sh
+      ports:
+          - ${REDIS_PORT}:6379
+      #command: ['redis-server', '/usr/local/etc/redis/redis.conf']
+      command: sh -c "/usr/local/etc/redis/init.sh"
+      logging:
+          options:
+              max-size: 5m
+#  rabbitmq:
+#      image: rabbitmq
+#      hostname: rabbitmq
+#      container_name: ${APP_NAME}_rabbitmq
+#      ports:
+#          - "5672:5672"
+#  rabbitmq-management:
+#      image: rabbitmq-management
+#      container_name: ${APP_NAME}_rabbitmq_management
+#      ports:
+#          - "15672:15672"
+networks:
+    default:
+        external: false
+        name: ${APP_NAME}_network
+#  db:
+#    image: mariadb:10.5.5
+#    container_name: demo_db
+#    restart: always
+#    volumes:
+#      - ./mysql_volume:/var/lib/mysql
+#      - ./db_cfg_custom.conf:/etc/mysql/conf.d/db_cfg_custom.conf
+#    ports:
+#      - ${DB_PORT}:3306
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+#      - MYSQL_DATABASE=${DB_DATABASE}
+#    logging:
+#      options:
+#        max-size: 5m
+#  rabbitmq:
+#      image: "rabbitmq:3-management"
+#      hostname: "rabbit"
+#      ports:
+#          - "15672:15672"
+#          - "5672:5672"
+#      labels:
+#          NAME: "rabbitmq"
+#      volumes:
+#          - ./rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.config
